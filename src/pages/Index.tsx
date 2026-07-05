@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Icon from '@/components/ui/icon';
 import QrScanner from '@/components/QrScanner';
 import { toast } from 'sonner';
@@ -32,11 +32,29 @@ const tabs = [
   { id: 'profile', label: 'Профиль', icon: 'User' },
 ];
 
+const STORAGE_KEY = 'zarechye-mural-progress';
+
+const loadPoints = (): Point[] => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return initialPoints;
+    const foundIds: number[] = JSON.parse(saved);
+    return initialPoints.map((p) => (foundIds.includes(p.id) ? { ...p, found: true } : p));
+  } catch {
+    return initialPoints;
+  }
+};
+
 const Index = () => {
   const [tab, setTab] = useState('map');
-  const [points, setPoints] = useState<Point[]>(initialPoints);
+  const [points, setPoints] = useState<Point[]>(loadPoints);
   const foundCount = points.filter((p) => p.found).length;
   const progress = Math.round((foundCount / points.length) * 100);
+
+  useEffect(() => {
+    const foundIds = points.filter((p) => p.found).map((p) => p.id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(foundIds));
+  }, [points]);
 
   const handleScan = (raw: string) => {
     const text = raw.trim().toLowerCase();
