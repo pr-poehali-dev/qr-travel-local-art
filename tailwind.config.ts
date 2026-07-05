@@ -68,6 +68,11 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			fontFamily: {
+				display: ['Cormorant', 'serif'],
+				script: ['Marck Script', 'cursive'],
+				body: ['Golos Text', 'sans-serif']
+			},
 			keyframes: {
 				'accordion-down': {
 					from: {

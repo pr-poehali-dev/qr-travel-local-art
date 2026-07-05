@@ -4,35 +4,35 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 40 44% 96%;
+    --foreground: 25 40% 16%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 40 50% 98%;
+    --card-foreground: 25 40% 16%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 40 50% 98%;
+    --popover-foreground: 25 40% 16%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 14 72% 45%;
+    --primary-foreground: 40 50% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 158 40% 28%;
+    --secondary-foreground: 40 50% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 38 30% 90%;
+    --muted-foreground: 25 20% 42%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 38 74% 52%;
+    --accent-foreground: 25 40% 16%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 40 50% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 32 34% 82%;
+    --input: 32 34% 82%;
+    --ring: 14 72% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -97,5 +97,69 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Golos Text", sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Cormorant", serif;
+  }
+  .font-script {
+    font-family: "Marck Script", cursive;
+  }
+  .ethnic-border {
+    background-image: repeating-linear-gradient(
+      45deg,
+      hsl(var(--accent) / 0.5),
+      hsl(var(--accent) / 0.5) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+  .fragment-reveal {
+    animation: fragmentReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes fragmentReveal {
+    from {
+      opacity: 0;
+      transform: scale(0.85) rotate(-3deg);
+      filter: blur(6px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(0);
+      filter: blur(0);
+    }
+  }
+  .float-slow {
+    animation: floatSlow 6s ease-in-out infinite;
+  }
+  @keyframes floatSlow {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  .pulse-ring::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 9999px;
+    border: 2px solid hsl(var(--primary));
+    animation: pulseRing 2s ease-out infinite;
+  }
+  @keyframes pulseRing {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
   }
 }
