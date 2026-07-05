@@ -2,6 +2,17 @@ import { useEffect, useState } from 'react';
 import Icon from '@/components/ui/icon';
 import QrScanner from '@/components/QrScanner';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const MURAL = 'https://cdn.poehali.dev/projects/560594a7-8f97-4d86-8194-5c0f90650ec3/files/3234124e-4dfa-47de-a754-bcb6bf539320.jpg';
 
@@ -75,6 +86,12 @@ const Index = () => {
     setTab('gallery');
   };
 
+  const handleReset = () => {
+    setPoints(initialPoints);
+    localStorage.removeItem(STORAGE_KEY);
+    toast('Прогресс сброшен', { description: 'Начни путешествие заново' });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-accent/20 blur-3xl" />
@@ -95,7 +112,7 @@ const Index = () => {
         {tab === 'map' && <MapView points={points} />}
         {tab === 'scan' && <ScanView onScan={handleScan} />}
         {tab === 'gallery' && <GalleryView points={points} progress={progress} foundCount={foundCount} />}
-        {tab === 'profile' && <ProfileView progress={progress} foundCount={foundCount} />}
+        {tab === 'profile' && <ProfileView progress={progress} foundCount={foundCount} onReset={handleReset} />}
       </main>
 
       <nav className="fixed bottom-0 inset-x-0 z-20">
@@ -218,7 +235,15 @@ const GalleryView = ({ points, progress, foundCount }: { points: Point[]; progre
   </section>
 );
 
-const ProfileView = ({ progress, foundCount }: { progress: number; foundCount: number }) => (
+const ProfileView = ({
+  progress,
+  foundCount,
+  onReset,
+}: {
+  progress: number;
+  foundCount: number;
+  onReset: () => void;
+}) => (
   <section className="fragment-reveal">
     <div className="rounded-3xl border border-border bg-card p-6 text-center relative overflow-hidden">
       <div className="ethnic-border absolute top-0 inset-x-0 h-2" />
@@ -262,6 +287,29 @@ const ProfileView = ({ progress, foundCount }: { progress: number; foundCount: n
         </div>
       ))}
     </div>
+
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <button className="mt-6 w-full py-3.5 rounded-2xl border border-destructive/30 text-destructive font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+          <Icon name="RotateCcw" size={18} />
+          Сбросить прогресс
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="font-display text-2xl">Сбросить прогресс?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Все найденные фрагменты росписи будут скрыты, и путешествие начнётся заново. Это действие нельзя отменить.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Отмена</AlertDialogCancel>
+          <AlertDialogAction onClick={onReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Сбросить
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </section>
 );
 
