@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const MURAL = 'https://cdn.poehali.dev/projects/560594a7-8f97-4d86-8194-5c0f90650ec3/files/3234124e-4dfa-47de-a754-bcb6bf539320.jpg';
 
@@ -59,6 +60,7 @@ const loadPoints = (): Point[] => {
 const Index = () => {
   const [tab, setTab] = useState('map');
   const [points, setPoints] = useState<Point[]>(loadPoints);
+  const [showVictory, setShowVictory] = useState(false);
   const foundCount = points.filter((p) => p.found).length;
   const progress = Math.round((foundCount / points.length) * 100);
 
@@ -79,16 +81,23 @@ const Index = () => {
       return;
     }
 
-    setPoints((prev) => prev.map((p) => (p.id === target.id ? { ...p, found: true } : p)));
+    const updated = points.map((p) => (p.id === target.id ? { ...p, found: true } : p));
+    setPoints(updated);
     toast(`Найден фрагмент: ${target.name}`, {
       description: 'Кусочек росписи открыт в галерее',
     });
-    setTab('gallery');
+
+    if (updated.every((p) => p.found)) {
+      setTimeout(() => setShowVictory(true), 500);
+    } else {
+      setTab('gallery');
+    }
   };
 
   const handleReset = () => {
     setPoints(initialPoints);
     localStorage.removeItem(STORAGE_KEY);
+    setShowVictory(false);
     toast('Прогресс сброшен', { description: 'Начни путешествие заново' });
   };
 
@@ -133,9 +142,77 @@ const Index = () => {
           ))}
         </div>
       </nav>
+
+      <VictoryDialog
+        open={showVictory}
+        onOpenChange={setShowVictory}
+        onReset={handleReset}
+        onViewGallery={() => {
+          setShowVictory(false);
+          setTab('gallery');
+        }}
+      />
     </div>
   );
 };
+
+const VictoryDialog = ({
+  open,
+  onOpenChange,
+  onReset,
+  onViewGallery,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onReset: () => void;
+  onViewGallery: () => void;
+}) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="max-w-sm p-0 overflow-hidden border-border bg-card">
+      <div className="relative">
+        <div className="ethnic-border h-2 w-full" />
+        <div className="relative overflow-hidden aspect-square">
+          <img src={MURAL} alt="Собранная роспись" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full bg-primary/90 backdrop-blur flex items-center justify-center text-primary-foreground shadow-2xl float-slow">
+              <Icon name="Sparkles" size={44} />
+            </div>
+          </div>
+        </div>
+        <div className="px-6 pb-6 pt-2 text-center">
+          <p className="font-script text-2xl text-primary leading-none">Поздравляем!</p>
+          <h2 className="font-display text-3xl font-bold mt-2">Роспись собрана полностью</h2>
+          <p className="text-sm text-muted-foreground mt-2">
+            Ты нашёл все 6 фрагментов и стал настоящим Хранителем картины Заречья.
+          </p>
+          <div className="flex items-center justify-center gap-1.5 mt-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Icon key={i} name="Star" size={18} className="text-accent fill-accent" />
+            ))}
+          </div>
+          <button
+            onClick={onViewGallery}
+            className="mt-6 w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-medium flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
+          >
+            <Icon name="Palette" size={20} />
+            Смотреть роспись
+          </button>
+          <button
+            onClick={() => {
+              onReset();
+              onOpenChange(false);
+            }}
+            className="mt-2 w-full py-2.5 rounded-2xl text-muted-foreground text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          >
+            <Icon name="RotateCcw" size={16} />
+            Начать заново
+          </button>
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
+);
 
 const MapView = ({ points }: { points: Point[] }) => (
   <section className="fragment-reveal">
