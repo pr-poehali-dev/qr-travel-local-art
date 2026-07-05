@@ -166,7 +166,26 @@ const VictoryDialog = ({
   onOpenChange: (v: boolean) => void;
   onReset: () => void;
   onViewGallery: () => void;
-}) => (
+}) => {
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Живая Роспись',
+      text: 'Я собрал всю роспись Заречья и стал Хранителем картины! Попробуй и ты найти все фрагменты 🎉',
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+        toast('Ссылка скопирована', { description: 'Отправь её друзьям' });
+      }
+    } catch {
+      /* пользователь отменил шаринг */
+    }
+  };
+
+  return (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-sm p-0 overflow-hidden border-border bg-card">
       <div className="relative">
@@ -199,6 +218,13 @@ const VictoryDialog = ({
             Смотреть роспись
           </button>
           <button
+            onClick={handleShare}
+            className="mt-2.5 w-full py-3.5 rounded-2xl border border-border font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          >
+            <Icon name="Share2" size={20} />
+            Поделиться
+          </button>
+          <button
             onClick={() => {
               onReset();
               onOpenChange(false);
@@ -212,7 +238,8 @@ const VictoryDialog = ({
       </div>
     </DialogContent>
   </Dialog>
-);
+  );
+};
 
 const MapView = ({ points }: { points: Point[] }) => (
   <section className="fragment-reveal">
