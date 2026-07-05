@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Icon from '@/components/ui/icon';
+import QrScanner from '@/components/QrScanner';
+import { toast } from 'sonner';
 
 const MURAL = 'https://cdn.poehali.dev/projects/560594a7-8f97-4d86-8194-5c0f90650ec3/files/3234124e-4dfa-47de-a754-bcb6bf539320.jpg';
 
@@ -11,18 +13,17 @@ type Point = {
   found: boolean;
   lat: number;
   lng: number;
+  code: string;
 };
 
-const points: Point[] = [
-  { id: 1, name: 'Птица Сирин', place: 'Краеведческий музей', distance: '120 м', found: true, lat: 22, lng: 30 },
-  { id: 2, name: 'Древо жизни', place: 'Старая площадь', distance: '340 м', found: true, lat: 40, lng: 62 },
-  { id: 3, name: 'Солнцеворот', place: 'Дом ремёсел', distance: '580 м', found: true, lat: 58, lng: 24 },
-  { id: 4, name: 'Конь-огонь', place: 'Набережная', distance: '1.1 км', found: false, lat: 70, lng: 70 },
-  { id: 5, name: 'Цветущий сад', place: 'Городской парк', distance: '1.4 км', found: false, lat: 30, lng: 84 },
-  { id: 6, name: 'Оберег', place: 'Часовня у моста', distance: '2.0 км', found: false, lat: 82, lng: 44 },
+const initialPoints: Point[] = [
+  { id: 1, name: 'Птица Сирин', place: 'Краеведческий музей', distance: '120 м', found: true, lat: 22, lng: 30, code: 'sirin' },
+  { id: 2, name: 'Древо жизни', place: 'Старая площадь', distance: '340 м', found: true, lat: 40, lng: 62, code: 'drevo' },
+  { id: 3, name: 'Солнцеворот', place: 'Дом ремёсел', distance: '580 м', found: true, lat: 58, lng: 24, code: 'solncevorot' },
+  { id: 4, name: 'Конь-огонь', place: 'Набережная', distance: '1.1 км', found: false, lat: 70, lng: 70, code: 'kon' },
+  { id: 5, name: 'Цветущий сад', place: 'Городской парк', distance: '1.4 км', found: false, lat: 30, lng: 84, code: 'sad' },
+  { id: 6, name: 'Оберег', place: 'Часовня у моста', distance: '2.0 км', found: false, lat: 82, lng: 44, code: 'obereg' },
 ];
-
-const fragments = points;
 
 const tabs = [
   { id: 'map', label: 'Карта', icon: 'MapPin' },
@@ -33,8 +34,28 @@ const tabs = [
 
 const Index = () => {
   const [tab, setTab] = useState('map');
+  const [points, setPoints] = useState<Point[]>(initialPoints);
   const foundCount = points.filter((p) => p.found).length;
   const progress = Math.round((foundCount / points.length) * 100);
+
+  const handleScan = (raw: string) => {
+    const text = raw.trim().toLowerCase();
+    const match = points.find(
+      (p) => p.found === false && (text.includes(p.code) || text.includes(p.name.toLowerCase()))
+    );
+    const target = match || points.find((p) => !p.found);
+
+    if (!target) {
+      toast('Вся роспись уже собрана!', { description: 'Ты настоящий хранитель картины 🎉' });
+      return;
+    }
+
+    setPoints((prev) => prev.map((p) => (p.id === target.id ? { ...p, found: true } : p)));
+    toast(`Найден фрагмент: ${target.name}`, {
+      description: 'Кусочек росписи открыт в галерее',
+    });
+    setTab('gallery');
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -53,9 +74,9 @@ const Index = () => {
       </header>
 
       <main className="relative px-5 pb-32 max-w-md mx-auto">
-        {tab === 'map' && <MapView />}
-        {tab === 'scan' && <ScanView />}
-        {tab === 'gallery' && <GalleryView progress={progress} foundCount={foundCount} />}
+        {tab === 'map' && <MapView points={points} />}
+        {tab === 'scan' && <ScanView onScan={handleScan} />}
+        {tab === 'gallery' && <GalleryView points={points} progress={progress} foundCount={foundCount} />}
         {tab === 'profile' && <ProfileView progress={progress} foundCount={foundCount} />}
       </main>
 
@@ -81,7 +102,7 @@ const Index = () => {
   );
 };
 
-const MapView = () => (
+const MapView = ({ points }: { points: Point[] }) => (
   <section className="fragment-reveal">
     <div className="flex items-center gap-2 mb-3 text-sm text-secondary font-medium">
       <Icon name="Navigation" size={16} />
@@ -131,34 +152,18 @@ const MapView = () => (
   </section>
 );
 
-const ScanView = () => (
-  <section className="fragment-reveal flex flex-col items-center">
-    <div className="relative w-full aspect-square rounded-3xl overflow-hidden border border-border bg-foreground/90 flex items-center justify-center">
-      <div className="absolute inset-8 rounded-2xl border-2 border-dashed border-accent/70" />
-      <div className="absolute inset-x-8 top-8 h-0.5 bg-accent shadow-[0_0_12px_2px] shadow-accent float-slow" />
-      {[
-        'top-6 left-6', 'top-6 right-6', 'bottom-6 left-6', 'bottom-6 right-6',
-      ].map((pos, i) => (
-        <div key={i} className={`absolute w-7 h-7 border-primary ${pos} ${i < 2 ? 'border-t-2' : 'border-b-2'} ${i % 2 === 0 ? 'border-l-2 rounded-tl-lg' : 'border-r-2 rounded-tr-lg'}`} />
-      ))}
-      <Icon name="QrCode" size={64} className="text-accent/50" />
-    </div>
-    <p className="text-center text-muted-foreground text-sm mt-5 max-w-xs">
-      Наведи камеру на QR-код рядом с достопримечательностью — фрагмент росписи откроется автоматически.
-    </p>
-    <button className="mt-5 w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-medium flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
-      <Icon name="Camera" size={20} />
-      Включить камеру
-    </button>
+const ScanView = ({ onScan }: { onScan: (text: string) => void }) => (
+  <section className="fragment-reveal">
+    <QrScanner onResult={onScan} />
   </section>
 );
 
-const GalleryView = ({ progress, foundCount }: { progress: number; foundCount: number }) => (
+const GalleryView = ({ points, progress, foundCount }: { points: Point[]; progress: number; foundCount: number }) => (
   <section className="fragment-reveal">
     <div className="rounded-3xl overflow-hidden border border-border relative aspect-square">
       <img src={MURAL} alt="Роспись" className="w-full h-full object-cover" />
       <div className="absolute inset-0 grid grid-cols-2 grid-rows-3">
-        {fragments.map((f) => (
+        {points.map((f) => (
           <div
             key={f.id}
             className={`border border-background/40 flex items-center justify-center transition-all ${
@@ -182,7 +187,7 @@ const GalleryView = ({ progress, foundCount }: { progress: number; foundCount: n
     </div>
 
     <div className="mt-5 grid grid-cols-2 gap-2.5">
-      {fragments.map((f) => (
+      {points.map((f) => (
         <div key={f.id} className={`p-3 rounded-2xl border ${f.found ? 'bg-card border-border' : 'bg-muted/50 border-dashed border-border'}`}>
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${f.found ? 'bg-accent/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
             <Icon name={f.found ? 'Sparkles' : 'Lock'} size={16} />
