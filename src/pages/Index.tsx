@@ -170,7 +170,7 @@ const VictoryDialog = ({
   const handleShare = async () => {
     const shareData = {
       title: 'Живая Роспись',
-      text: 'Я собрал всю роспись Заречья и стал Хранителем картины! Попробуй и ты найти все фрагменты 🎉',
+      text: 'Я собрал всю роспись Харовска и стал Хранителем картины! Попробуй и ты найти все фрагменты 🎉',
       url: window.location.href,
     };
     try {
@@ -203,7 +203,7 @@ const VictoryDialog = ({
           <p className="font-script text-2xl text-primary leading-none">Поздравляем!</p>
           <h2 className="font-display text-3xl font-bold mt-2">Роспись собрана полностью</h2>
           <p className="text-sm text-muted-foreground mt-2">
-            Ты нашёл все 6 фрагментов и стал настоящим Хранителем картины Заречья.
+            Ты нашёл все 6 фрагментов и стал настоящим Хранителем картины Харовска.
           </p>
           <div className="flex items-center justify-center gap-1.5 mt-4">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -354,7 +354,7 @@ const ProfileView = ({
       <div className="w-20 h-20 rounded-full mx-auto bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-primary-foreground mt-2">
         <Icon name="Compass" size={36} />
       </div>
-      <h2 className="font-display text-2xl font-bold mt-3">Странник Заречья</h2>
+      <h2 className="font-display text-2xl font-bold mt-3">Странник Харовска</h2>
       <p className="text-sm text-muted-foreground">Уровень: Искатель узоров</p>
     </div>
 
