@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
-const MURAL = 'https://cdn.poehali.dev/projects/560594a7-8f97-4d86-8194-5c0f90650ec3/files/3234124e-4dfa-47de-a754-bcb6bf539320.jpg';
+const MURAL = 'https://cdn.poehali.dev/projects/560594a7-8f97-4d86-8194-5c0f90650ec3/bucket/d2715d20-2ff2-435c-81cb-c96a8955c10c.jpg';
 
 type Point = {
   id: number;
